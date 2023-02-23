@@ -1,0 +1,55 @@
+spring:
+  application:
+    name: test-service
+  jpa:
+    hibernate:
+      naming:
+        physical-strategy: org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl
+      ddl-auto: create
+    #show-sql: true
+    show-sql: false
+    properties:
+      javax:
+        persistence:
+          sharedCache:
+            mode: ENABLE_SELECTIVE  #required - enable selective caching mode - only entities with @Cacheable annotation will use L2 cache
+      hibernate:
+        javax:
+          cache:
+            missing_cache_strategy: create   #optional - suppress 'missing cache' warnings
+        dialect: org.hibernate.dialect.Oracle12cDialect
+        format_sql: true
+        #generate_statistics: true   #optional - generate statistics to check if L2/query cache is actually being used
+        generate_statistics: false
+        cache:
+          use_second_level_cache: true   #required - turn on L2 cache
+          use_query_cache: true          #optional - turn on query cache (I guess this is required for our case)
+          region:
+            #factory_class: org.hibernate.cache.ehcache.EhCacheRegionFactory  #required - classpath to cache region factory
+            factory_class: org.hibernate.cache.jcache.JCacheRegionFactory     #required - classpath to cache region factory (for Hibernate >= 5.3)
+  datasource:
+    cache:
+      enabled: true
+      driverClassName: oracle.jdbc.OracleDriver
+      jdbcUrl: jdbc:oracle:thin:@localhost:1521/test
+      username: CACHE
+      password: 123456
+      dataModelVersion: v1  # FIXME Set this for each cache/service separately.
+      jpaTransactionManagerDefaultTimeout: 5  # The default timeout that cache transaction manager should apply if there is no timeout specified at the transaction level, in seconds. TODO This is for Spring level, set it for underlying database too.
+      #hikari:
+      minimumIdle: 1
+      maximumPoolSize: 5
+      connectionTimeout: 1000  # The maximum number of milliseconds that a client will wait for a connection from the pool. It is set to 1s for fail fast, because it's cache. TODO Make sure that the SQLException is caught and suppressed.
+      #initializationFailTimeout: -1
+
+logging:
+  level:
+    org:
+      hibernate:
+        #type: trace
+        type: info
+
+# To kill query running on underlying database (Oracle) after specific timeout (not tested):
+#create profile cache_profile limit cpu_per_session 200;
+#alter user CACHE profile cache_profile;
+#http://www.adp-gmbh.ch/ora/concepts/profile.html

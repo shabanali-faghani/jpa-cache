@@ -1,0 +1,12 @@
+CREATE TABLE TEST_SERVICE
+(
+    ID               INT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
+    PROFILE          VARCHAR2(8),
+    CACHENAME        VARCHAR2(32),
+    DATAMODELVERSION VARCHAR2(16),
+    KEY              VARCHAR2(128),
+    RESPONSE         CLOB,
+    UUID             VARCHAR2(36),
+    TIMESTAMP        TIMESTAMP,
+    HITS             number(13) default 1
+);
